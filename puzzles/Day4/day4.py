@@ -46,7 +46,6 @@ def part1():
                             return calculate_score(boards_numbers[i], boards_drawn[i], n)
 
 
-
 def part2():
     lines = read_input().split('\n')
     to_draw = [int(i) for i in lines[0].split(',')]

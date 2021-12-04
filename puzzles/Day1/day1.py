@@ -1,31 +1,16 @@
 from util import read_input_as_numbers
 
 
+def find_n_positive_deltas(items, window_size):
+    return len([b - a for a, b in zip(items[:-window_size], items[window_size:]) if b > a])
+
+
 def part1():
-    numbers = read_input_as_numbers()
-    prev = None
-    c = 0
-    for n in numbers:
-        if prev is not None and n > prev:
-            c += 1
-        prev = n
-    return c
+    return find_n_positive_deltas(read_input_as_numbers(), 1)
 
 
 def part2():
-    numbers = read_input_as_numbers()
-    prev = None
-    prevb = None
-    c = 0
-    last_s = None
-    for n in numbers:
-        if prev is not None and prevb is not None and last_s is not None and sum((n, prev, prevb)) > last_s:
-            c += 1
-        if prev is not None and prevb is not None:
-            last_s = sum((n, prev, prevb))
-        prevb = prev
-        prev = n
-    return c
+    return find_n_positive_deltas(read_input_as_numbers(), 3)
 
 
 if __name__ == '__main__':
