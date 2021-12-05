@@ -1,62 +1,48 @@
-from collections import defaultdict
-
 from util import *
 
 
-def part1():
-    lines = read_input_as_lines()
-    counter = defaultdict(lambda: defaultdict(int))
+def count_bits_for_position(lines, position):
+    counter = {0: 0, 1: 0}
     for line in lines:
-        for i in range(len(line)):
-            counter[i][line[i]] += 1
-    gamma = ''
-    epsilon = ''
-    for i in range(12):
-        if counter[i]['0'] > counter[i]['1']:
-            gamma += '0'
-            epsilon += '1'
-        else:
-            gamma += '1'
-            epsilon += '0'
-    print(gamma, epsilon)
-    return int(gamma, 2) * int(epsilon, 2)
-
-
-def count(lines):
-    counter = defaultdict(lambda: defaultdict(int))
-    for line in lines:
-        for i in range(len(line)):
-            counter[i][line[i]] += 1
+        counter[int(line[position])] += 1
     return counter
+
+
+def count_bits_for_all_positions(lines):
+    return [count_bits_for_position(lines, pos) for pos in range(len(lines[0]))]
+
+
+def part1():
+    counts = count_bits_for_all_positions(read_input_as_lines())
+    gamma = 0
+    epsilon = 0
+    for counts_for_position in counts:
+        gamma <<= 1
+        epsilon <<= 1
+        if counts_for_position[0] > counts_for_position[1]:
+            epsilon += 1
+        else:
+            gamma += 1
+    return gamma * epsilon
+
+
+def extract_value_by_bit_criterium(values, invert=False):
+    bit_index = 0
+    while len(values) > 1:
+        counter = count_bits_for_position(values, bit_index)
+        target_bit = 0 if counter[0] > counter[1] else 1
+        if invert:
+            target_bit = 1 - target_bit
+        values = [p for p in values if int(p[bit_index]) == target_bit]
+        bit_index += 1
+    return int(values[0], 2)
 
 
 def part2():
     lines = read_input_as_lines()
-    counter = count(lines)
-    for line in lines:
-        for i in range(len(line)):
-            counter[i][line[i]] += 1
-
-    possible_oxygen = lines[:]
-    bit_i = 0
-    while len(possible_oxygen) > 1:
-        common_bit = '0' if counter[bit_i]['0'] > counter[bit_i]['1'] else '1'
-        possible_oxygen = [p for p in possible_oxygen if p[bit_i] == common_bit]
-        bit_i += 1
-        counter = count(possible_oxygen)
-    oxygen = int(possible_oxygen[0], 2)
-
-    possible_co2 = lines[:]
-    bit_i = 0
-    while len(possible_co2) > 1:
-        common_bit = '1' if counter[bit_i]['0'] > counter[bit_i]['1'] else '0'
-        possible_co2 = [p for p in possible_co2 if p[bit_i] == common_bit]
-        bit_i += 1
-        counter = count(possible_co2)
-    co2_scrubber = int(possible_co2[0], 2)
+    oxygen = extract_value_by_bit_criterium(lines[:])
+    co2_scrubber = extract_value_by_bit_criterium(lines[:], invert=True)
     return co2_scrubber * oxygen
-
-
 
 
 if __name__ == '__main__':
