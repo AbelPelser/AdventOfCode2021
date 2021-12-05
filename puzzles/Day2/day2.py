@@ -1,11 +1,13 @@
 from util import read_input_as_lines, read_input_as_numbers
 
+import re
 
 def part1():
     lines = read_input_as_lines()
     depth = 0
     pos = 0
     for l in lines:
+
         if l.startswith('forward '):
             pos += int(l[8:])
         elif l.startswith('down '):
@@ -13,7 +15,6 @@ def part1():
         elif l.startswith('up '):
             depth -= int(l[3:])
     return pos * depth
-
 
 
 def part2():
