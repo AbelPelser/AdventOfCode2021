@@ -1,79 +1,61 @@
 from util import *
 
 
-def calculate_score(board_numbers, board_drawn, last_n):
-    print(board_drawn)
-    print(board_numbers)
-    print(last_n)
-    sum = 0
-    for y, row in enumerate(board_numbers):
-        for x, number in enumerate(row):
-            if not board_drawn[y][x]:
-                sum += number
-    print(sum)
-    return sum * last_n
+class Board:
+    def __init__(self, lines):
+        self.numbers = []
+        self.drawn = []
+        for line in remove_empty(lines):
+            number_strings = remove_empty(line.split(' '))
+            self.numbers.append(list(map(int, number_strings)))
+            self.drawn.append([False] * len(self.numbers[-1]))
+
+    def draw(self, number):
+        for y, row in enumerate(self.numbers):
+            if number in row:
+                x = row.index(number)
+                self.drawn[y][x] = True
+                return all(self.drawn[y]) or all([row[x] for row in self.drawn])
+        return False
+
+    def calculate_score(self, last_drawn):
+        return last_drawn * sum([
+            self.numbers[y][x]
+            for y in range(len(self.numbers))
+            for x in range(len(self.numbers[y]))
+            if not self.drawn[y][x]
+        ])
 
 
-def check_col(board_drawn, x):
-    for row in board_drawn:
-        if row[x] is False:
-            return False
-    return True
+def parse_input():
+    to_draw_str, text = read_input().split('\n', 1)
+    to_draw = list(map(int, to_draw_str.split(',')))
+    boards = []
+    for board_str in text.split('\n\n'):
+        boards.append(Board(board_str.split('\n')))
+    return to_draw, boards
 
 
 def part1():
-    lines = read_input().split('\n')
-    to_draw = [int(i) for i in lines[0].split(',')]
-    boards_drawn = []
-    boards_numbers = []
-    for line in lines[1:]:
-        if line.strip() == '' or len(boards_drawn) == 0:
-            boards_drawn.append([])
-            boards_numbers.append([])
-        else:
-            boards_numbers[-1].append([int(n.strip()) for n in line.split(' ') if n.strip() != ''])
-            boards_drawn[-1].append([False, False, False, False, False])
-    print(boards_numbers)
+    to_draw, boards = parse_input()
     for n in to_draw:
-        for i, board_numbers in enumerate(boards_numbers):
-            for y, row in enumerate(board_numbers):
-                for x, number in enumerate(row):
-                    if number == n:
-                        boards_drawn[i][y][x] = True
-                        if all(boards_drawn[i][y]):
-                            return calculate_score(boards_numbers[i], boards_drawn[i], n)
-                        if check_col(boards_drawn[i], x):
-                            return calculate_score(boards_numbers[i], boards_drawn[i], n)
+        for board in boards:
+            if board.draw(n):
+                return board.calculate_score(n)
 
 
 def part2():
-    lines = read_input().split('\n')
-    to_draw = [int(i) for i in lines[0].split(',')]
-    boards_drawn = []
-    boards_numbers = []
-    boards_won = []
-    for line in lines[1:]:
-        if line.strip() == '' or len(boards_drawn) == 0:
-            boards_drawn.append([])
-            boards_numbers.append([])
-        else:
-            boards_numbers[-1].append([int(n.strip()) for n in line.split(' ') if n.strip() != ''])
-            boards_drawn[-1].append([False, False, False, False, False])
-    print(boards_numbers)
-    for n in to_draw:
-        for i, board_numbers in enumerate(boards_numbers):
-            if board_numbers in boards_won:
+    to_draw, boards = parse_input()
+    boards_won = set()
+
+    for number in to_draw:
+        for board in boards:
+            if board in boards_won:
                 continue
-            for y, row in enumerate(board_numbers):
-                for x, number in enumerate(row):
-                    if number == n:
-                        boards_drawn[i][y][x] = True
-                        win = all(boards_drawn[i][y]) or check_col(boards_drawn[i], x)
-                        if win:
-                            boards_won.append(boards_numbers[i])
-                            if len(boards_won) == len(boards_numbers) - 1:
-                                return calculate_score(boards_numbers[i], boards_drawn[i], n)
-    print(len(boards_won), len(boards_numbers))
+            if board.draw(number):
+                boards_won.add(board)
+                if len(boards_won) == len(boards):
+                    return board.calculate_score(number)
 
 
 if __name__ == '__main__':
