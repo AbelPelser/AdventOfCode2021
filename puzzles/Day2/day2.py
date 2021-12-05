@@ -1,36 +1,39 @@
-from util import read_input_as_lines, read_input_as_numbers
-
 import re
+
+from util import read_input_as_lines
+
+
+def parse_command(command):
+    command, amount = re.match('([a-z]+) ([0-9]+)', command).groups()
+    return command, int(amount)
+
 
 def part1():
     lines = read_input_as_lines()
-    depth = 0
-    pos = 0
-    for l in lines:
-
-        if l.startswith('forward '):
-            pos += int(l[8:])
-        elif l.startswith('down '):
-            depth += int(l[5:])
-        elif l.startswith('up '):
-            depth -= int(l[3:])
+    depth = pos = 0
+    for line in lines:
+        action, amount = parse_command(line)
+        if action == 'forward':
+            pos += amount
+        elif action == 'down':
+            depth += amount
+        elif action == 'up':
+            depth -= amount
     return pos * depth
 
 
 def part2():
     lines = read_input_as_lines()
-    aim = 0
-    pos = 0
-    depth = 0
-    for l in lines:
-        if l.startswith('forward '):
-            val = int(l[8:])
-            pos += val
-            depth += aim * val
-        elif l.startswith('down '):
-            aim += int(l[5:])
-        elif l.startswith('up '):
-            aim -= int(l[3:])
+    aim = pos = depth = 0
+    for line in lines:
+        action, amount = parse_command(line)
+        if action == 'forward':
+            pos += amount
+            depth += aim * amount
+        elif action == 'down':
+            aim += amount
+        elif action == 'up':
+            aim -= amount
     return pos * depth
 
 
