@@ -23,7 +23,6 @@ def part1():
                 allowed_closes.append(PAIRS[c])
             else:
                 if c != allowed_closes[-1]:
-                    print(line, c)
                     score += illegal_c_map[c]
                     corrupt = True
                     break
@@ -44,7 +43,6 @@ def part2():
                 allowed_closes.append(PAIRS[c])
             else:
                 if c != allowed_closes[-1]:
-                    print(line, c)
                     corrupt = True
                     break
                 allowed_closes = allowed_closes[:-1]
