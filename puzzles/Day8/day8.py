@@ -1,79 +1,51 @@
+from str_util import extract_letter_frequencies, sorted_str
 from util import *
+from util import read_input_as_lines
 
+
+def parse_line(line):
+    patterns, output_value = line.split('|')
+    patterns_split = [sorted_str(x) for x in remove_empty(patterns.split())]
+    output_value = [sorted_str(x) for x in remove_empty(output_value.split())]
+    return patterns_split, output_value
 
 
 def part1():
     lines = read_input_as_lines()
     count = 0
     for line in lines:
-        a = line.split('|')[1]
-        b = remove_empty(a.split(' '))
-        for c in b:
-            if len(c) in (2, 4, 3, 7):
-                count += 1
+        _, output_value = parse_line(line)
+        count += len([o for o in output_value if len(o) in (2, 3, 4, 7)])
     return count
 
 
-positions = {
-
-}
-
-
 def part2():
+    # Can be determined by hand, or not
+    sorted_frequencies_to_digits = {
+        (4, 6, 7, 8, 8, 9): 0,
+        (8, 9): 1,
+        (4, 7, 7, 8, 8): 2,
+        (7, 7, 8, 8, 9): 3,
+        (6, 7, 8, 9): 4,
+        (6, 7, 7, 8, 9): 5,
+        (4, 6, 7, 7, 8, 9): 6,
+        (8, 8, 9): 7,
+        (4, 6, 7, 7, 8, 8, 9): 8,
+        (6, 7, 7, 8, 8, 9): 9
+    }
+
     lines = read_input_as_lines()
     count = 0
     for line in lines:
-        patterns, output_value = line.split('|')
-        patterns_split = [''.join(sorted(x)) for x in remove_empty(patterns.split(' '))]
-        output_value_split = [''.join(sorted(x)) for x in remove_empty(output_value.split(' '))]
+        patterns_split, output_value_split = parse_line(line)
         patterns_to_digits = {}
-        digits_to_patterns = {}
+        letters_to_frequencies = extract_letter_frequencies(''.join(patterns_split))
+
         for pattern in patterns_split:
-            if len(pattern) == 2:
-                patterns_to_digits[pattern] = 1
-                digits_to_patterns[1] = pattern
-            elif len(pattern) == 3:
-                patterns_to_digits[pattern] = 7
-                digits_to_patterns[7] = pattern
-            elif len(pattern) == 4:
-                patterns_to_digits[pattern] = 4
-                digits_to_patterns[4] = pattern
-            elif len(pattern) == 7:
-                patterns_to_digits[pattern] = 8
-                digits_to_patterns[8] = pattern
-        for pattern in patterns_split:
-            if len(pattern) == 5 and all([x in pattern for x in digits_to_patterns[7]]):
-                patterns_to_digits[pattern] = 3
-                digits_to_patterns[3] = pattern
-        for pattern in patterns_split:
-            if len(pattern) == 6 and all([x in pattern for x in digits_to_patterns[3]]):
-                patterns_to_digits[pattern] = 9
-                digits_to_patterns[9] = pattern
-        letter_only_missing_in_2 = None
-        for letter in list('abcdefg'):
-            if len([r for r in patterns_split if letter in r]) == 9:
-                letter_only_missing_in_2 = letter
-        for pattern in patterns_split:
-            if len(pattern) == 5 and letter_only_missing_in_2 not in pattern:
-                patterns_to_digits[pattern] = 2
-                digits_to_patterns[2] = pattern
-        for pattern in patterns_split:
-            if len(pattern) == 5 and pattern not in patterns_to_digits.keys():
-                patterns_to_digits[pattern] = 5
-                digits_to_patterns[5] = pattern
-        for pattern in patterns_split:
-            if len(pattern) == 6 and all([x in pattern for x in digits_to_patterns[7]]) and pattern not in patterns_to_digits.keys():
-                patterns_to_digits[pattern] = 0
-                digits_to_patterns[0] = pattern
-        for pattern in patterns_split:
-            if len(pattern) == 6 and pattern not in patterns_to_digits.keys():
-                patterns_to_digits[pattern] = 6
-                digits_to_patterns[6] = pattern
-        number = ''
-        for output in output_value_split:
-            digit = str(patterns_to_digits[output])
-            number += digit
-        count += int(number)
+            sorted_frequencies = tuple(sorted([letters_to_frequencies[c] for c in pattern]))
+            patterns_to_digits[pattern] = sorted_frequencies_to_digits[sorted_frequencies]
+        digits_as_str = (str(patterns_to_digits[o]) for o in output_value_split)
+        count += int(''.join(digits_as_str))
     return count
 
 
