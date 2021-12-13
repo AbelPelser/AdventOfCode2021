@@ -11,12 +11,15 @@ class Board:
             self.drawn.append([False] * len(self.numbers[-1]))
 
     def draw(self, number):
+        won = False
         for y, row in enumerate(self.numbers):
             if number in row:
                 x = row.index(number)
                 self.drawn[y][x] = True
-                return all(self.drawn[y]) or all([row[x] for row in self.drawn])
-        return False
+                won = all(self.drawn[y]) or all([row[x] for row in self.drawn])
+        if won:
+            return self.calculate_score(number)
+        return None
 
     def calculate_score(self, last_drawn):
         return last_drawn * sum([
@@ -38,24 +41,25 @@ def parse_input():
 
 def part1():
     to_draw, boards = parse_input()
-    for n in to_draw:
+    for number in to_draw:
         for board in boards:
-            if board.draw(n):
-                return board.calculate_score(n)
+            result = board.draw(number)
+            if result is not None:
+                return result
 
 
 def part2():
     to_draw, boards = parse_input()
     boards_won = set()
-
     for number in to_draw:
         for board in boards:
             if board in boards_won:
                 continue
-            if board.draw(number):
+            result = board.draw(number)
+            if result is not None:
                 boards_won.add(board)
                 if len(boards_won) == len(boards):
-                    return board.calculate_score(number)
+                    return result
 
 
 if __name__ == '__main__':

@@ -17,7 +17,7 @@ def remove_empty(l):
     return filter(None, l)
 
 
-def safe_split(text, delim):
+def safe_split(text, delim='\n'):
     return list(remove_empty(text.split(delim)))
 
 
