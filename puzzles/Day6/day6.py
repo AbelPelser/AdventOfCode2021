@@ -4,20 +4,20 @@ from util import *
 def parse_input():
     lines = read_input_as_lines()
     numbers = list(map(int, lines[0].split(',')))
-    fish_per_timer_value = [0] * 9
+    n_fish_per_timer_value = [0] * 9
     for n in numbers:
-        fish_per_timer_value[n] += 1
-    return fish_per_timer_value
+        n_fish_per_timer_value[n] += 1
+    return n_fish_per_timer_value
 
 
-def simulate_lanternfish(fish_per_timer_value, n_steps):
+def simulate_lanternfish(n_fish_per_timer_value, n_steps):
     for _ in range(n_steps):
-        new_fish_per_timer_value = [0] * 9
+        next_n_fish_per_timer_value = [0] * 9
         for timer in range(9):
-            new_fish_per_timer_value[timer] = fish_per_timer_value[(timer + 1) % 9]
-        new_fish_per_timer_value[6] += fish_per_timer_value[0]
-        fish_per_timer_value = new_fish_per_timer_value
-    return sum(fish_per_timer_value)
+            next_n_fish_per_timer_value[timer] = n_fish_per_timer_value[(timer + 1) % 9]
+        next_n_fish_per_timer_value[6] += n_fish_per_timer_value[0]
+        n_fish_per_timer_value = next_n_fish_per_timer_value
+    return sum(n_fish_per_timer_value)
 
 
 def part1():
