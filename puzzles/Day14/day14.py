@@ -3,53 +3,52 @@ from collections import defaultdict
 from util import *
 
 
-def part1():
+def parse_input():
     text = read_input()
-    start, pairs_str = safe_split(text, '\n\n')
-    pairs = {}
-    for line in safe_split(pairs_str):
-        f, t = line.split(' -> ')
-        pairs[f] = t
-    string = start
-    for _ in range(10):
-        new_string = string[0]
-        for i in range(1, len(string)):
-            if string[i - 1:i + 1] in pairs.keys():
-                new_string += pairs[string[i - 1:i + 1]] + string[i]
-            else:
-                new_string += string[i]
-        string = new_string
+    polymer_template, pair_insertion_rules_str = safe_split(text, '\n\n')
+    pair_insertion_rules = {}
+    for line in safe_split(pair_insertion_rules_str):
+        pair, to_insert = line.split(' -> ')
+        pair_insertion_rules[pair] = to_insert
+    return polymer_template, pair_insertion_rules
 
-    quantities = defaultdict(int)
-    for c in string:
-        quantities[c] += 1
-    return max(quantities.values()) - min([v for v in quantities.values() if v != 0])
+
+def run_pair_insertion_step(current_pair_counts, element_quantities, pair_insertion_rules):
+    next_pair_counts = defaultdict(int)
+    for pair, to_insert in pair_insertion_rules.items():
+        pair_count = current_pair_counts[pair]
+        if pair_count > 0:
+            left, right = list(pair)
+            next_pair_counts[left + to_insert] += pair_count
+            next_pair_counts[to_insert + right] += pair_count
+            element_quantities[to_insert] += pair_count
+    return next_pair_counts
+
+
+def run_pair_insertion(n_steps):
+    polymer_template, pair_insertion_rules = parse_input()
+
+    current_pair_counts = defaultdict(int)
+    for i in range(1, len(polymer_template)):
+        pair = polymer_template[i - 1:i + 1]
+        current_pair_counts[pair] += 1
+
+    element_quantities = defaultdict(int)
+    for c in list(polymer_template):
+        element_quantities[c] += 1
+
+    for _ in range(n_steps):
+        current_pair_counts = run_pair_insertion_step(current_pair_counts, element_quantities, pair_insertion_rules)
+    all_quantities = element_quantities.values()
+    return max(all_quantities) - min(all_quantities)
+
+
+def part1():
+    return run_pair_insertion(10)
 
 
 def part2():
-    text = read_input()
-    start, pairs_str = safe_split(text, '\n\n')
-    pairs = {}
-    for line in safe_split(pairs_str):
-        f, t = line.split(' -> ')
-        pairs[f] = t
-
-    pairs_present = defaultdict(int)
-    for i in range(1, len(start)):
-        pairs_present[start[i-1:i+1]] += 1
-    quantities = defaultdict(int)
-    for c in list(start):
-        quantities[c] += 1
-
-    for _ in range(40):
-        new_pairs_present = defaultdict(int)
-        for f, t in pairs.items():
-            if pairs_present[f] > 0:
-                new_pairs_present[f[0] + t] += pairs_present[f]
-                new_pairs_present[t + f[1]] += pairs_present[f]
-                quantities[t] += pairs_present[f]
-        pairs_present = new_pairs_present
-    return max(quantities.values()) - min([v for v in quantities.values() if v != 0])
+    return run_pair_insertion(40)
 
 
 if __name__ == '__main__':
