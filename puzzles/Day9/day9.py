@@ -1,38 +1,49 @@
 from util import *
 
 
+# def get_neighbour_coords(grid, *coord):
+#     size = len(grid)
+#     remaining_dimensions = grid[0]
+#     value, *remaining_coord = coord
+#     if not isinstance(remaining_dimensions, list):
+#         if value < size - 1:
+#             yield
+#     for resl
+
+
 def part1():
     lines = read_input_as_lines()
     sum_of_risk = 0
     for y in range(len(lines)):
         for x in range(len(lines[y])):
             value = int(lines[y][x])
-            if x > 0 and x < len(lines[y]) - 1 and y > 0 and y < len(lines) - 1:
-                if value < int(lines[y-1][x]) and value < int(lines[y+1][x]) and value < int(lines[y][x-1]) and value < int(lines[y][x+1]):
+            if 0 < x < len(lines[y]) - 1 and 0 < y < len(lines) - 1:
+                if value < int(lines[y - 1][x]) and value < int(lines[y + 1][x]) and value < int(
+                        lines[y][x - 1]) and value < int(lines[y][x + 1]):
                     sum_of_risk += value + 1
-            elif x > 0 and x < len(lines[y]) - 1 and y == 0:
-                if value < int(lines[y+1][x]) and value < int(lines[y][x-1]) and value < int(lines[y][x+1]):
+            elif len(lines[y]) - 1 > x > 0 == y:
+                if value < int(lines[y + 1][x]) and value < int(lines[y][x - 1]) and value < int(lines[y][x + 1]):
                     sum_of_risk += value + 1
-            elif x == 0 and y > 0 and y < len(lines) - 1:
-                if value < int(lines[y-1][x]) and value < int(lines[y+1][x]) and value < int(lines[y][x+1]):
+            elif x == 0 and 0 < y < len(lines) - 1:
+                if value < int(lines[y - 1][x]) and value < int(lines[y + 1][x]) and value < int(lines[y][x + 1]):
                     sum_of_risk += value + 1
-            elif x == len(lines[y]) - 1 and y > 0 and y < len(lines) - 1:
-                if value < int(lines[y-1][x]) and value < int(lines[y+1][x]) and value < int(lines[y][x-1]):
+            elif x == len(lines[y]) - 1 and 0 < y < len(lines) - 1:
+                if value < int(lines[y - 1][x]) and value < int(lines[y + 1][x]) and value < int(lines[y][x - 1]):
                     sum_of_risk += value + 1
-            elif x > 0 and x < len(lines[y]) - 1 and y == len(lines) - 1:
-                if value < int(lines[y-1][x]) and value < int(lines[y][x-1]) and value < int(lines[y][x+1]):
+            elif 0 < x < len(lines[y]) - 1 and y == len(lines) - 1:
+                if value < int(lines[y - 1][x]) and value < int(lines[y][x - 1]) and value < int(lines[y][x + 1]):
                     sum_of_risk += value + 1
             elif x == 0 and y == 0:
-                if value < int(lines[y+1][x]) and value < int(lines[y][x+1]):
+                if value < int(lines[y + 1][x]) and value < int(lines[y][x + 1]):
                     sum_of_risk += value + 1
             elif x == len(lines[y]) - 1 and y == len(lines) - 1:
-                if value < int(lines[y-1][x]) and value < int(lines[y][x-1]):
+                if value < int(lines[y - 1][x]) and value < int(lines[y][x - 1]):
                     sum_of_risk += value + 1
             elif x == 0 and y == len(lines) - 1:
-                if value < int(lines[y-1][x]) and value < int(lines[y][x+1]):
+                if value < int(lines[y - 1][x]) and value < int(lines[y][x + 1]):
                     sum_of_risk += value + 1
             elif x == len(lines[y]) - 1 and y == 0:
-                if value < int(lines[y+1][x]) and value < int(lines[y][x-1]):
+                if value < int(lines[y + 1][x]) and value < int(lines[y][x - 1]):
                     sum_of_risk += value + 1
     return sum_of_risk
 
@@ -41,33 +52,34 @@ def find_low_points(lines):
     for y in range(len(lines)):
         for x in range(len(lines[y])):
             value = int(lines[y][x])
-            if x > 0 and x < len(lines[y]) - 1 and y > 0 and y < len(lines) - 1:
-                if value < int(lines[y-1][x]) and value < int(lines[y+1][x]) and value < int(lines[y][x-1]) and value < int(lines[y][x+1]):
+            if 0 < x < len(lines[y]) - 1 and 0 < y < len(lines) - 1:
+                if value < int(lines[y - 1][x]) and value < int(lines[y + 1][x]) and value < int( lines[y][x - 1]) and value < int(lines[y][x + 1]):
                     yield y, x
-            elif x > 0 and x < len(lines[y]) - 1 and y == 0:
-                if value < int(lines[y+1][x]) and value < int(lines[y][x-1]) and value < int(lines[y][x+1]):
+            elif 0 < x < len(lines[y]) - 1 and y == 0:
+                if value < int(lines[y + 1][x]) and value < int(lines[y][x - 1]) and value < int(lines[y][x + 1]):
                     yield y, x
-            elif x == 0 and y > 0 and y < len(lines) - 1:
-                if value < int(lines[y-1][x]) and value < int(lines[y+1][x]) and value < int(lines[y][x+1]):
+            elif x == 0 and 0 < y < len(lines) - 1:
+                if value < int(lines[y - 1][x]) and value < int(lines[y + 1][x]) and value < int(lines[y][x + 1]):
                     yield y, x
-            elif x == len(lines[y]) - 1 and y > 0 and y < len(lines) - 1:
-                if value < int(lines[y-1][x]) and value < int(lines[y+1][x]) and value < int(lines[y][x-1]):
+            elif x == len(lines[y]) - 1 and 0 < y < len(lines) - 1:
+                if value < int(lines[y - 1][x]) and value < int(lines[y + 1][x]) and value < int(lines[y][x - 1]):
                     yield y, x
-            elif x > 0 and x < len(lines[y]) - 1 and y == len(lines) - 1:
-                if value < int(lines[y-1][x]) and value < int(lines[y][x-1]) and value < int(lines[y][x+1]):
+            elif 0 < x < len(lines[y]) - 1 and y == len(lines) - 1:
+                if value < int(lines[y - 1][x]) and value < int(lines[y][x - 1]) and value < int(lines[y][x + 1]):
                     yield y, x
             elif x == 0 and y == 0:
-                if value < int(lines[y+1][x]) and value < int(lines[y][x+1]):
+                if value < int(lines[y + 1][x]) and value < int(lines[y][x + 1]):
                     yield y, x
             elif x == len(lines[y]) - 1 and y == len(lines) - 1:
-                if value < int(lines[y-1][x]) and value < int(lines[y][x-1]):
+                if value < int(lines[y - 1][x]) and value < int(lines[y][x - 1]):
                     yield y, x
             elif x == 0 and y == len(lines) - 1:
-                if value < int(lines[y-1][x]) and value < int(lines[y][x+1]):
+                if value < int(lines[y - 1][x]) and value < int(lines[y][x + 1]):
                     yield y, x
             elif x == len(lines[y]) - 1 and y == 0:
-                if value < int(lines[y+1][x]) and value < int(lines[y][x-1]):
+                if value < int(lines[y + 1][x]) and value < int(lines[y][x - 1]):
                     yield y, x
+
 
 def find_basin(lines_nr, x, y, basin, seen):
     if (x, y) in seen:
@@ -82,6 +94,7 @@ def find_basin(lines_nr, x, y, basin, seen):
             if (new_x, new_y) not in basin:
                 basin.append((new_x, new_y))
             find_basin(lines_nr, new_x, new_y, basin, seen)
+
 
 def part2():
     lines = read_input_as_lines()
