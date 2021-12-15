@@ -1,14 +1,20 @@
 from util import *
 
 
-# def get_neighbour_coords(grid, *coord):
-#     size = len(grid)
-#     remaining_dimensions = grid[0]
-#     value, *remaining_coord = coord
-#     if not isinstance(remaining_dimensions, list):
-#         if value < size - 1:
-#             yield
-#     for resl
+def get_neighbour_coords(grid, *coord):
+    size = len(grid)
+    remaining_dimensions = grid[0]
+    value, *remaining_coord = coord
+    neighbours_in_current_dimension = [n for n in (value -1, value+1) if 0 <= n < size]
+
+    for neighbour in neighbours_in_current_dimension:
+
+
+
+    if not isinstance(remaining_dimensions, list):
+        if value < size - 1:
+
+    for resl
 
 
 def part1():
