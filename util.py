@@ -44,3 +44,11 @@ def read_input_as_digit_grid(filename='input'):
 
 def read_input_as_passports(filename='input'):
     return map(lambda p: p.strip(), read_input_split(filename, '\n\n'))
+
+
+def convert_hex_into_bit_string(hex_string):
+    bit_groups = []
+    for c in list(hex_string):
+        value = int(c, 16)
+        bit_groups.append(bin(value)[2:].zfill(4))
+    return ''.join(bit_groups)
