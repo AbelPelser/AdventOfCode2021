@@ -38,5 +38,9 @@ def read_input_as_numbers(filename='input'):
     return list(map(lambda l: int(l), read_input_as_lines(filename=filename)))
 
 
+def read_input_as_digit_grid(filename='input'):
+    return [list(map(int, list(l))) for l in (read_input_as_lines(filename=filename))]
+
+
 def read_input_as_passports(filename='input'):
     return map(lambda p: p.strip(), read_input_split(filename, '\n\n'))
