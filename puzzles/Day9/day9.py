@@ -1,20 +1,17 @@
 from util import *
 
 
-def get_neighbour_coords(grid, *coord):
+def get_neighbour_coords(grid, coord):
     size = len(grid)
-    remaining_dimensions = grid[0]
     value, *remaining_coord = coord
-    neighbours_in_current_dimension = [n for n in (value -1, value+1) if 0 <= n < size]
-
-    for neighbour in neighbours_in_current_dimension:
-
-
-
-    if not isinstance(remaining_dimensions, list):
-        if value < size - 1:
-
-    for resl
+    neighbours_in_current_dimension = [n for n in (value - 1, value + 1) if 0 <= n < size]
+    if len(remaining_coord) == 0:
+        for neighbour in neighbours_in_current_dimension:
+            yield [neighbour]
+    else:
+        for neighbour in neighbours_in_current_dimension:
+            for result in get_neighbour_coords(grid[0], remaining_coord):
+                yield [neighbour] + result
 
 
 def part1():
@@ -59,7 +56,8 @@ def find_low_points(lines):
         for x in range(len(lines[y])):
             value = int(lines[y][x])
             if 0 < x < len(lines[y]) - 1 and 0 < y < len(lines) - 1:
-                if value < int(lines[y - 1][x]) and value < int(lines[y + 1][x]) and value < int( lines[y][x - 1]) and value < int(lines[y][x + 1]):
+                if value < int(lines[y - 1][x]) and value < int(lines[y + 1][x]) and value < int(
+                        lines[y][x - 1]) and value < int(lines[y][x + 1]):
                     yield y, x
             elif 0 < x < len(lines[y]) - 1 and y == 0:
                 if value < int(lines[y + 1][x]) and value < int(lines[y][x - 1]) and value < int(lines[y][x + 1]):
