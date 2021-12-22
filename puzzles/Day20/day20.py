@@ -1,64 +1,77 @@
 from util import *
 
-
-def get_neighbours(grid, x, y):
-    yield x - 1, y - 1
-    yield x, y - 1
-    yield x + 1, y - 1
-    yield x - 1, y
-    yield x, y
-    yield x + 1, y
-    yield x - 1, y + 1
-    yield x, y + 1
-    yield x + 1, y + 1
+GROWTH_PER_DIMENSION_PER_STEP = 1
 
 
-def get_pixel_index(grid, x, y, step_is_even, pixel_0):
-    pixels = ''
-    for x_n, y_n in get_neighbours(grid, x, y):
-        if 0 <= x_n <= len(grid[0]) - 1 and 0 <= y_n <= len(grid) - 1:
-            pixels += grid[y_n][x_n]
-        else:
-            if step_is_even:
-                pixels += '.' if pixel_0 == '#' else '#'
+def get_pattern_coords(x, y):
+    for d_y in (-1, 0, 1):
+        for d_x in (-1, 0, 1):
+            yield x + d_x, y + d_y
+
+
+class ImageEnhancer:
+    def __init__(self, grid, algorithm):
+        self.grid = []
+        for row in grid:
+            self.grid.append([])
+            for char in row:
+                self.grid[-1].append(1 if char == '#' else 0)
+        self.algorithm = [int(value) for value in list(algorithm.replace('.', '0').replace('#', '1'))]
+        self.height = len(self.grid)
+        self.width = len(self.grid[0])
+        self.step_count = 0
+
+    def set_image(self, grid):
+        self.grid = grid
+        self.height = len(self.grid)
+        self.width = len(self.grid[0])
+
+    def get_value_of_area_around_pixel(self, x, y):
+        area_value = 0
+        bit_i = 8
+        for x_n, y_n in get_pattern_coords(x, y):
+            if 0 <= x_n <= self.width - 1 and 0 <= y_n <= self.height - 1:
+                pixel = self.grid[y_n][x_n]
+            elif self.step_count % 2 == 0:
+                pixel = 0
             else:
-                pixels += pixel_0
-    return int(pixels.replace('#', '1').replace('.', '0'), 2)
+                pixel = self.algorithm[0]
+            area_value += pixel << bit_i
+            bit_i -= 1
+        return area_value
+
+    def step(self):
+        margin = GROWTH_PER_DIMENSION_PER_STEP
+        new_image = []
+        for y in range(-margin, self.height + margin):
+            new_image.append([])
+            for x in range(-margin, self.width + margin):
+                index = self.get_value_of_area_around_pixel(x, y)
+                new_image[-1].append(self.algorithm[index])
+        self.step_count += 1
+        self.set_image(new_image)
+
+    def enhance(self, n_steps):
+        for _ in range(n_steps):
+            self.step()
+
+    def get_n_pixels_lit(self):
+        return sum((line.count(1) for line in self.grid))
 
 
-def step(algorithm, current_image, step_n):
-    s = 2
-    new_image = ['' for _ in range(len(current_image) + 2 * s)]
-    pixel_0 = algorithm[0]
-    for y in range(-s, len(current_image) + s):
-        for x in range(-s, len(current_image[0]) + s):
-            index = get_pixel_index(current_image, x, y, step_n % 2 == 0, pixel_0)
-            new_image[y + s] += algorithm[index]
-    return new_image
+def enhance_input_image_and_count_lit(n_steps):
+    lines = read_input_as_lines()
+    enhancer = ImageEnhancer(lines[1:], lines[0])
+    enhancer.enhance(n_steps)
+    return enhancer.get_n_pixels_lit()
 
 
 def part1():
-    lines = read_input_as_lines()
-    algorithm = lines[0]
-    current_image = lines[1:]
-    for n in range(2):
-        current_image = step(algorithm, current_image, n)
-    total_lit = 0
-    for line in current_image:
-        total_lit += line.count('#')
-    return total_lit
+    return enhance_input_image_and_count_lit(2)
 
 
 def part2():
-    lines = read_input_as_lines()
-    algorithm = lines[0]
-    current_image = lines[1:]
-    for n in range(50):
-        current_image = step(algorithm, current_image, n)
-    total_lit = 0
-    for line in current_image:
-        total_lit += line.count('#')
-    return total_lit
+    return enhance_input_image_and_count_lit(50)
 
 
 if __name__ == '__main__':
