@@ -3,6 +3,45 @@ def get_area_cube(cube):
     return (x_to - x_from) * (y_to - y_from) * (z_to - z_from)
 
 
+def can_join(c1, c2):
+    x_from1, x_to1, y_from1, y_to1, z_from1, z_to1 = c1
+    x_from2, x_to2, y_from2, y_to2, z_from2, z_to2 = c2
+    x_matches = x_from1 == x_from2 and x_to1 == x_to2
+    y_matches = y_from1 == y_from2 and y_to1 == y_to2
+    z_matches = z_from1 == z_from2 and z_to1 == z_to2
+    if x_matches and y_matches and (z_to1 == z_from2 or z_to2 == z_from1):
+        return True
+    if x_matches and z_matches and (y_to1 == y_from2 or y_to2 == y_from1):
+        return True
+    if y_matches and z_matches and (x_to1 == x_from2 or x_to2 == x_from1):
+        return True
+    return False
+
+
+def join_cube(c1, c2):
+    x_from1, x_to1, y_from1, y_to1, z_from1, z_to1 = c1
+    x_from2, x_to2, y_from2, y_to2, z_from2, z_to2 = c2
+    x_matches = x_from1 == x_from2 and x_to1 == x_to2
+    y_matches = y_from1 == y_from2 and y_to1 == y_to2
+    z_matches = z_from1 == z_from2 and z_to1 == z_to2
+    if x_matches and y_matches:
+        if z_to1 == z_from2:
+            return x_from1, x_to1, y_from1, y_to1, z_from1, z_to2
+        if z_to2 == z_from1:
+            return x_from1, x_to1, y_from1, y_to1, z_from2, z_to1
+    if x_matches and z_matches:
+        if y_to1 == y_from2:
+            return x_from1, x_to1, y_from1, y_to2, z_from1, z_to1
+        if y_to2 == y_from1:
+            return x_from1, x_to1, y_from2, y_to1, z_from1, z_to1
+    if y_matches and z_matches:
+        if x_to1 == x_from2:
+            return x_from1, x_to2, y_from1, y_to1, z_from1, z_to1
+        if x_to2 == x_from1:
+            return x_from2, x_to1, y_from1, y_to1, z_from1, z_to1
+    assert False
+
+
 def cubes_overlap(a, b):
     a_x_from, a_x_to, a_y_from, a_y_to, a_z_from, a_z_to = a
     b_x_from, b_x_to, b_y_from, b_y_to, b_z_from, b_z_to = b
@@ -16,7 +55,6 @@ def cubes_overlap(a, b):
 
 
 def split_overlapping_cube(overlapping_cube, cube_to_split):
-    # print(f'<{overlapping_cube}>, <{cube_to_split}>')
     a_x_from, a_x_to, a_y_from, a_y_to, a_z_from, a_z_to = overlapping_cube
     b_x_from, b_x_to, b_y_from, b_y_to, b_z_from, b_z_to = cube_to_split
 
