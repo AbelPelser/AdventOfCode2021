@@ -101,18 +101,14 @@ def sweep(bits, start_n, find_max=False):
                 if find_max and int(new_n) > int(best_n):
                     best_res = res
                     best_n = str(new_n)
-                elif (not find_max) and int(new_n) < int(best_n):
+                elif not find_max and int(new_n) < int(best_n):
                     best_res = res
                     best_n = str(new_n)
     return best_n
 
 
 def part1():
-    lines = read_input_as_lines()
-    # res = check_model_number(lines, 2510000370204)
-    # print(res)
     n = '9' * 14
-    ranges = ((0, 1, 2), (2, 3, 4), (4, 5, 6), (6, 7, 8), (8, 9, 10), (10, 11, 12), (11, 12, 13))
     ranges = [(i - 1, i) for i in range(1, 14)]
     for bit_range in ranges:
         n = sweep(bit_range, n, find_max=True)
@@ -124,7 +120,6 @@ def part1():
 
 def part2():
     n = '9' * 14
-    ranges = ((0, 1, 2), (2, 3, 4), (4, 5, 6), (6, 7, 8), (8, 9, 10), (10, 11, 12), (11, 12, 13))
     ranges = [(i - 1, i) for i in range(1, 14)]
     for bit_range in ranges:
         n = sweep(bit_range, n)
