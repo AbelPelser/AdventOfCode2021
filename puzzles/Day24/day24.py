@@ -1,52 +1,8 @@
+from puzzles.Day24.alu import ALU
+from puzzles.Day24.z3_solver import Z3ConstraintGenerator
 from puzzles.util import replace_bit
+
 from util import *
-
-
-class ALU:
-    def __init__(self):
-        self.variables = {'w': 0, 'x': 0, 'y': 0, 'z': 0}
-        self.input_counter = 0
-        self.inputs = []
-
-    def parse(self, line, op):
-        target, operand = line.split(f'{op} ')[-1].split(' ')
-        if operand in self.variables.keys():
-            operand = self.variables[operand]
-        return target, int(operand)
-
-    def run(self, lines, inputs=None):
-        if input is None:
-            inputs = []
-        self.inputs = inputs
-        self.variables = {'w': 0, 'x': 0, 'y': 0, 'z': 0}
-        self.input_counter = 0
-        for line in lines:
-            if line.startswith('inp'):
-                var_name = line.split('inp ')[-1]
-                value = self.input()
-                self.variables[var_name] = value
-                # exec(f'self.{var_name} = {value}')
-            elif line.startswith('add'):
-                target, operand = self.parse(line, 'add')
-                self.variables[target] += operand
-            elif line.startswith('mul'):
-                target, operand = self.parse(line, 'mul')
-                self.variables[target] *= operand
-            elif line.startswith('div'):
-                target, operand = self.parse(line, 'div')
-                self.variables[target] //= operand
-            elif line.startswith('mod'):
-                target, operand = self.parse(line, 'mod')
-                self.variables[target] %= operand
-            elif line.startswith('eql'):
-                target, operand = self.parse(line, 'eql')
-                self.variables[target] = int(self.variables[target] == operand)
-        return self.variables
-
-    def input(self):
-        res = self.inputs[self.input_counter]
-        self.input_counter += 1
-        return res
 
 
 def check_model_number_with_alu(lines, number):
@@ -74,17 +30,22 @@ def simulate_alu(inp):
     return z, suggestions
 
 
+def check_model_number_with_simulated_alu(number):
+    z, _ = simulate_alu(number)
+    return z == 0
+
+
 def follow_suggestions(n):
     res, suggestions = simulate_alu(n)
     while len(suggestions) > 0:
-        # Change most significant digit first
+        # Most significant digit first
         key = min(suggestions.keys())
         n = n[:key] + str(suggestions[key]) + n[key + 1:]
         res, suggestions = simulate_alu(n)
     return res, n
 
 
-def sweep(bits, start_n, find_max=False):
+def bruteforce_digits_in_range(bits, start_n, find_max=False):
     n = start_n
     best_res, _ = simulate_alu(n)
     best_n = n
@@ -110,25 +71,43 @@ def sweep(bits, start_n, find_max=False):
 def part1():
     n = '9' * 14
     ranges = [(i - 1, i) for i in range(1, 14)]
-    for bit_range in ranges:
-        n = sweep(bit_range, n, find_max=True)
-    for bit_range in ranges:
-        n = sweep(bit_range, n, find_max=True)
+    loop = True
+    while loop:
+        prev_n = n
+        for digit_range in ranges:
+            n = bruteforce_digits_in_range(digit_range, n, find_max=True)
+        loop = prev_n != n
     assert check_model_number_with_alu(read_input_as_lines(), n)
     return int(n)
+
+
+def part1_z3():
+    generator = Z3ConstraintGenerator()
+    generator.add_monad_constraints(read_input_as_lines())
+    return generator.find_max_monad()
 
 
 def part2():
     n = '9' * 14
     ranges = [(i - 1, i) for i in range(1, 14)]
-    for bit_range in ranges:
-        n = sweep(bit_range, n)
-    for bit_range in ranges:
-        n = sweep(bit_range, n)
+    loop = True
+    while loop:
+        prev_n = n
+        for digit_range in ranges:
+            n = bruteforce_digits_in_range(digit_range, n)
+        loop = prev_n != n
     assert check_model_number_with_alu(read_input_as_lines(), n)
     return int(n)
 
 
+def part2_z3():
+    generator = Z3ConstraintGenerator()
+    generator.add_monad_constraints(read_input_as_lines())
+    return generator.find_min_monad()
+
+
 if __name__ == '__main__':
-    print(part1())
-    print(part2())
+    print(time_call(part1))
+    print(time_call(part2))
+    print(time_call(part1_z3))
+    print(time_call(part2_z3))
