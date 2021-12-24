@@ -93,26 +93,18 @@ def sweep(bits, start_n, find_max=False):
         n_ = replace_bit(n, replace[0], i)
         for j in range(1, 10):
             n_ = replace_bit(n_, replace[1], j)
-            for k in range(1, 10):
-                n_ = replace_bit(n_, replace[2], k)
-                for l in range(1, 10):
-                    n_ = replace_bit(n_, replace[3], l)
-                    for m in range(1, 10):
-                        n_ = replace_bit(n_, replace[4], m)
-                        res, new_n = follow_suggestions(n_)
-                        if best_res is None or (best_res != 0 and res < best_res):
-                            best_res = res
-                            best_n = str(new_n)
-                        elif best_res == 0 and res == 0:
-                            if find_max and int(new_n) > int(best_n):
-                                best_res = res
-                                best_n = str(new_n)
-                            elif (not find_max) and int(new_n) < int(best_n):
-                                best_res = res
-                                best_n = str(new_n)
+            res, new_n = follow_suggestions(n_)
+            if best_res is None or (best_res != 0 and res < best_res):
+                best_res = res
+                best_n = str(new_n)
+            elif best_res == 0 and res == 0:
+                if find_max and int(new_n) > int(best_n):
+                    best_res = res
+                    best_n = str(new_n)
+                elif (not find_max) and int(new_n) < int(best_n):
+                    best_res = res
+                    best_n = str(new_n)
     return best_n
-
-
 
 
 def part1():
@@ -120,7 +112,8 @@ def part1():
     # res = check_model_number(lines, 2510000370204)
     # print(res)
     n = '9' * 14
-    ranges = ((0, 1, 2, 3, 4), (3, 4, 5, 6, 7), (6, 7, 8, 9, 10), (9, 10, 11, 12, 13))
+    ranges = ((0, 1, 2), (2, 3, 4), (4, 5, 6), (6, 7, 8), (8, 9, 10), (10, 11, 12), (11, 12, 13))
+    ranges = [(i - 1, i) for i in range(1, 14)]
     for bit_range in ranges:
         n = sweep(bit_range, n, find_max=True)
     for bit_range in ranges:
@@ -131,7 +124,8 @@ def part1():
 
 def part2():
     n = '9' * 14
-    ranges = ((0, 1, 2, 3, 4), (3, 4, 5, 6, 7), (6, 7, 8, 9, 10), (9, 10, 11, 12, 13))
+    ranges = ((0, 1, 2), (2, 3, 4), (4, 5, 6), (6, 7, 8), (8, 9, 10), (10, 11, 12), (11, 12, 13))
+    ranges = [(i - 1, i) for i in range(1, 14)]
     for bit_range in ranges:
         n = sweep(bit_range, n)
     for bit_range in ranges:
