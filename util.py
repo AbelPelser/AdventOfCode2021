@@ -52,3 +52,7 @@ def convert_hex_into_bit_string(hex_string):
         value = int(c, 16)
         bit_groups.append(bin(value)[2:].zfill(4))
     return ''.join(bit_groups)
+
+
+def string_to_digits(string):
+    return list(map(int, list(string)))

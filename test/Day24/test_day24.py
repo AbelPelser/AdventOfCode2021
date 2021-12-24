@@ -6,7 +6,7 @@ from test.TestConfig import TestConfig
 
 class Day24Test(TestConfig, unittest.TestCase):
     def test_day24_part1(self):
-        self.assertEqual(part1(), 0)
+        self.assertEqual(part1(), 59998426997979)
 
     def test_day24_part2(self):
-        self.assertEqual(part2(), 0)
+        self.assertEqual(part2(), 13621111481315)
