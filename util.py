@@ -39,7 +39,7 @@ def read_input_as_numbers(filename='input'):
 
 
 def read_input_as_digit_grid(filename='input'):
-    return [list(map(int, list(l))) for l in (read_input_as_lines(filename=filename))]
+    return [list(map(int, list(line))) for line in (read_input_as_lines(filename=filename))]
 
 
 def read_input_as_passports(filename='input'):
@@ -56,3 +56,16 @@ def convert_hex_into_bit_string(hex_string):
 
 def string_to_digits(string):
     return list(map(int, list(string)))
+
+
+def get_neighbour_coords_in_grid(grid, coord):
+    coord = tuple(coord)
+    neighbours = []
+    current_dimension = grid
+    for i in range(len(coord)):
+        for delta in (-1, 1):
+            value = coord[i] + delta
+            if 0 <= value < len(current_dimension):
+                neighbours.append(coord[:i] + (value,) + coord[i + 1:])
+        current_dimension = current_dimension[0]
+    return neighbours

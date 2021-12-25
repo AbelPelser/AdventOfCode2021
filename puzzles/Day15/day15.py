@@ -32,7 +32,7 @@ def get_neighbours(lines_nr, x, y):
 def find_shortest_path_from_top_left_to_bottom_right(grid):
     distances = dijkstra_distance(
         start_node=(0, 0),
-        get_neighbours_of_node=lambda node: get_neighbours(grid, node[0], node[1]),
+        get_neighbours_of_node=lambda node: get_neighbour_coords_in_grid(grid, node[0], node[1]),
         get_cost_of_node=lambda node: grid[node[1]][node[0]]
     )
     return distances[(len(grid[0]) - 1, len(grid) - 1)]
