@@ -1,87 +1,86 @@
-from collections import defaultdict
+import re
+from collections import defaultdict, namedtuple
 
-p1_start = 3
-p2_start = 10
+from util import read_input_as_lines, time_call
+
+
+def parse_input():
+    start_positions = []
+    for line in read_input_as_lines():
+        position = re.match('Player \\d+ starting position: (\\d+)', line).groups()[0]
+        start_positions.append(int(position) - 1)
+    return start_positions
+
+
+class DiracRunner:
+    def __init__(self, starting_positions):
+        self.positions = starting_positions
+        self.die_roll_value = 1
+        self.n_die_rolls = 0
+        self.scores = [0, 0]
+        self.player_turn = 0
+
+    def roll(self):
+        result = self.die_roll_value
+        self.die_roll_value = (self.die_roll_value % 100) + 1
+        self.n_die_rolls += 1
+        return result
+
+    def run(self):
+        while max(self.scores) < 1000:
+            self.positions[self.player_turn] += sum((self.roll() for _ in range(3)))
+            self.positions[self.player_turn] %= 10
+            self.scores[self.player_turn] += self.positions[self.player_turn] + 1
+            self.player_turn = 1 - self.player_turn
+        return min(self.scores) * self.n_die_rolls
 
 
 def part1():
-    die_roll_value = 1
-    n_die_rolls = 0
-    p1_pos = p1_start - 1
-    p2_pos = p2_start - 1
-    p1_score = 0
-    p2_score = 0
-    while True:
-        def roll():
-            nonlocal die_roll_value, n_die_rolls
-
-            result = die_roll_value
-            die_roll_value += 1
-            if die_roll_value > 100:
-                die_roll_value = 1
-            n_die_rolls += 1
-            return result
-
-        p1_move = roll() + roll() + roll()
-        p1_pos = (p1_pos + p1_move) % 10
-        p1_score += p1_pos + 1
-        if p1_score >= 1000:
-            return p2_score * n_die_rolls
-        p2_move = roll() + roll() + roll()
-        p2_pos = (p2_pos + p2_move) % 10
-        p2_score += p2_pos + 1
-        if p2_score >= 1000:
-            return p1_score * n_die_rolls
+    return DiracRunner(parse_input()).run()
 
 
 def part2():
-    # total_value: number of ways to reach this value in one triple throw
-    possible_throws = {
-        3: 1,
-        4: 3,
-        5: 6,
-        6: 7,
-        7: 6,
-        8: 3,
-        9: 1
-    }
+    return DiracUniverseSimulator(parse_input()).run()
 
-    n_universes_won_p1 = 0
-    n_universes_won_p2 = 0
-    n_universes_with_game = defaultdict(int)
-    # p1_score, p2_score, p1_pos, p2_pos
-    n_universes_with_game[(0, 0, p1_start - 1, p2_start - 1)] = 1
-    while len(n_universes_with_game) > 0:
-        p1_score = p2_score = p1_pos = p2_pos = n_universes = None
-        for (p1_score, p2_score, p1_pos, p2_pos), n_universes in n_universes_with_game.items():
-            break
-        del n_universes_with_game[(p1_score, p2_score, p1_pos, p2_pos)]
-        # player 1
-        games_after_first_turn = defaultdict(int)
-        for throw_value, n_possible_ways_to_throw_in_turn in possible_throws.items():
+
+GameState = namedtuple('GameState', ('scores', 'positions'))
+POSSIBLE_THROWS = {3: 1, 4: 3, 5: 6, 6: 7, 7: 6, 8: 3, 9: 1}
+
+
+class DiracUniverseSimulator:
+    def __init__(self, start_positions):
+        self.n_universes_won = [0, 0]
+        self.n_universes_with_game = defaultdict(int)
+        self.n_universes_with_game_after_turn = None
+        self.n_universes_with_game[GameState((0, 0), tuple(start_positions))] = 1
+        self.player_turn = 0
+
+    def play_turn_for_game_state(self, game_state, n_universes):
+        for throw_value, n_possible_ways_to_throw_in_turn in POSSIBLE_THROWS.items():
             n_universes_with_throw = n_universes * n_possible_ways_to_throw_in_turn
-            p1_pos_after_throw = (p1_pos + throw_value) % 10
-            p1_score_after_throw = p1_score + p1_pos_after_throw + 1
-            if p1_score_after_throw >= 21:
-                n_universes_won_p1 += n_universes_with_throw
+            pos_after_throw = (game_state.positions[self.player_turn] + throw_value) % 10
+            score_after_throw = game_state.scores[self.player_turn] + pos_after_throw + 1
+            if score_after_throw >= 21:
+                self.n_universes_won[self.player_turn] += n_universes_with_throw
             else:
-                games_after_first_turn[
-                    (p1_score_after_throw, p2_score, p1_pos_after_throw, p2_pos)] += n_universes_with_throw
-        # player 2
-        for (p1_score_after_throw, p2_score, p1_pos_after_throw,
-             p2_pos), n_universes_after_first_turn in games_after_first_turn.items():
-            for throw_value, n_possible_ways_to_throw_in_turn in possible_throws.items():
-                n_universes_with_throw = n_universes_after_first_turn * n_possible_ways_to_throw_in_turn
-                p2_pos_after_throw = (p2_pos + throw_value) % 10
-                p2_score_after_throw = p2_score + p2_pos_after_throw + 1
-                if p2_score_after_throw >= 21:
-                    n_universes_won_p2 += n_universes_with_throw
+                if self.player_turn == 0:
+                    new_state = GameState((score_after_throw, game_state.scores[1]),
+                                          (pos_after_throw, game_state.positions[1]))
                 else:
-                    n_universes_with_game[(p1_score_after_throw, p2_score_after_throw, p1_pos_after_throw,
-                                           p2_pos_after_throw)] += n_universes_with_throw
-    return max(n_universes_won_p1, n_universes_won_p2)
+                    new_state = GameState((game_state.scores[0], score_after_throw),
+                                          (game_state.positions[0], pos_after_throw))
+                self.n_universes_with_game_after_turn[new_state] += n_universes_with_throw
+
+    def run(self):
+        while len(self.n_universes_with_game) > 0:
+            self.n_universes_with_game_after_turn = defaultdict(int)
+            for game_state, n_universes in self.n_universes_with_game.items():
+                self.play_turn_for_game_state(game_state, n_universes)
+            self.n_universes_with_game = self.n_universes_with_game_after_turn
+            self.player_turn = 1 - self.player_turn
+        return max(self.n_universes_won)
 
 
 if __name__ == '__main__':
-    print(part1())
-    print(part2())
+    print(time_call(part1))
+    print(time_call(part2))

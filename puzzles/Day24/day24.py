@@ -83,6 +83,7 @@ def part1():
 
 def part1_z3():
     generator = Z3ConstraintGenerator()
+    generator.solver.assertions()
     generator.add_monad_constraints(read_input_as_lines())
     return generator.find_max_monad()
 

@@ -42,10 +42,13 @@ class Z3ConstraintGenerator:
                 self.solver.add(target < 10)
                 self.solver.add(target > 0)
             elif op == 'add':
+                # if not (isinstance(operands[1], int) and operands[1] == 0):
                 self.solver.add(target == (operands[0] + operands[1]))
             elif op == 'mul':
+                # if not (isinstance(operands[1], int) and operands[1] == 0):
                 self.solver.add(target == (operands[0] * operands[1]))
             elif op == 'div':
+                # if not (isinstance(operands[1], int) and operands[1] == 1):
                 self.solver.add(target == (operands[0] / operands[1]))
             elif op == 'mod':
                 self.solver.add(target == (operands[0] % operands[1]))
