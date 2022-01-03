@@ -1,5 +1,5 @@
 import time
-from functools import reduce
+from functools import cache, reduce
 
 
 def mult(iterable):
@@ -17,6 +17,7 @@ def remove_empty(l):
     return filter(None, l)
 
 
+@cache
 def safe_split(text, delim='\n'):
     return list(remove_empty(text.split(delim)))
 
@@ -46,6 +47,7 @@ def read_input_as_passports(filename='input'):
     return map(lambda p: p.strip(), read_input_split(filename, '\n\n'))
 
 
+@cache
 def convert_hex_into_bit_string(hex_string):
     bit_groups = []
     for c in list(hex_string):
@@ -54,11 +56,12 @@ def convert_hex_into_bit_string(hex_string):
     return ''.join(bit_groups)
 
 
+@cache
 def string_to_digits(string):
     return list(map(int, list(string)))
 
 
-def get_neighbour_coords_in_grid(grid, coord):
+def get_neighbour_coords_in_matrix(grid, coord):
     coord = tuple(coord)
     neighbours = []
     current_dimension = grid
@@ -69,3 +72,18 @@ def get_neighbour_coords_in_grid(grid, coord):
                 neighbours.append(coord[:i] + (value,) + coord[i + 1:])
         current_dimension = current_dimension[0]
     return neighbours
+
+
+def enumerate_matrix(matrix):
+    for index, item in enumerate(matrix):
+        sub_coord = [index]
+        if isinstance(item, list):
+            for sub_indices, scalar in enumerate_matrix(item):
+                yield sub_coord + sub_indices, scalar
+        else:
+            yield sub_coord, item
+
+
+@cache
+def replace_item_in_list(n, bit, value):
+    return n[:bit] + str(value) + n[bit + 1:]

@@ -1,7 +1,7 @@
+import operator
+
 from puzzles.Day24.alu import ALU
 from puzzles.Day24.z3_solver import Z3ConstraintGenerator
-from puzzles.util import replace_bit
-
 from util import *
 
 
@@ -12,6 +12,7 @@ def check_model_number_with_alu(lines, number):
     return helper.variables['z'] == 0
 
 
+@cache
 def simulate_alu(inp):
     secret_x = [13, 12, 12, 10, -11, -13, 15, 10, -2, -6, 14, 0, -15, -4]
     secret_y = [8, 13, 8, 10, 12, 1, 13, 5, 10, 3, 2, 2, 12, 7]
@@ -35,70 +36,64 @@ def check_model_number_with_simulated_alu(number):
     return z == 0
 
 
-def follow_suggestions(n):
-    res, suggestions = simulate_alu(n)
+@cache
+def follow_suggestions(number_str):
+    res, suggestions = simulate_alu(number_str)
     while len(suggestions) > 0:
         # Most significant digit first
         key = min(suggestions.keys())
-        n = n[:key] + str(suggestions[key]) + n[key + 1:]
-        res, suggestions = simulate_alu(n)
-    return res, n
+        number_str = number_str[:key] + str(suggestions[key]) + number_str[key + 1:]
+        res, suggestions = simulate_alu(number_str)
+    return res, number_str
 
 
-def bruteforce_digits_in_range(bits, start_n, find_max=False):
-    n = start_n
-    best_res, _ = simulate_alu(n)
-    best_n = n
-    replace = bits
+def bruteforce_digits(digit_indices, number_str, monad_comparator):
+    best_z, _ = simulate_alu(number_str)
+    best_number_str = number_str
+    best_number_int = int(number_str)
     for i in range(1, 10):
-        n_ = replace_bit(n, replace[0], i)
+        number_str = replace_item_in_list(number_str, digit_indices[0], i)
         for j in range(1, 10):
-            n_ = replace_bit(n_, replace[1], j)
-            res, new_n = follow_suggestions(n_)
-            if best_res is None or (best_res != 0 and res < best_res):
-                best_res = res
-                best_n = str(new_n)
-            elif best_res == 0 and res == 0:
-                if find_max and int(new_n) > int(best_n):
-                    best_res = res
-                    best_n = str(new_n)
-                elif not find_max and int(new_n) < int(best_n):
-                    best_res = res
-                    best_n = str(new_n)
-    return best_n
+            number_str = replace_item_in_list(number_str, digit_indices[1], j)
+            z, changed_number_str = follow_suggestions(number_str)
+            changed_number_int = int(changed_number_str)
+
+            if (best_z is None) or \
+                    (best_z > 0 and z < best_z) or \
+                    (best_z == 0 and z == 0 and monad_comparator(changed_number_int, best_number_int)):
+                best_z = z
+                best_number_str = changed_number_str
+                best_number_int = int(best_number_str)
+    return best_number_str
+
+
+# monad_comparator: accepts two monads, keep the first if result is True, and the second otherwise
+def bruteforce_optimal_nomad(monad_comparator):
+    number = '9' * 14
+    consecutive_digit_indices = [(i - 1, i) for i in range(1, 14)]
+    loop = True
+    while loop:
+        # Sometimes multiple runs are needed
+        prev_number = number
+        for digit_indices in consecutive_digit_indices:
+            number = bruteforce_digits(digit_indices, number, monad_comparator)
+        loop = prev_number != number
+    assert check_model_number_with_alu(read_input_as_lines(), number)
+    return int(number)
 
 
 def part1():
-    n = '9' * 14
-    ranges = [(i - 1, i) for i in range(1, 14)]
-    loop = True
-    while loop:
-        prev_n = n
-        for digit_range in ranges:
-            n = bruteforce_digits_in_range(digit_range, n, find_max=True)
-        loop = prev_n != n
-    assert check_model_number_with_alu(read_input_as_lines(), n)
-    return int(n)
+    return bruteforce_optimal_nomad(operator.gt)
 
 
 def part1_z3():
     generator = Z3ConstraintGenerator()
-    generator.solver.assertions()
     generator.add_monad_constraints(read_input_as_lines())
     return generator.find_max_monad()
 
 
 def part2():
-    n = '9' * 14
-    ranges = [(i - 1, i) for i in range(1, 14)]
-    loop = True
-    while loop:
-        prev_n = n
-        for digit_range in ranges:
-            n = bruteforce_digits_in_range(digit_range, n)
-        loop = prev_n != n
-    assert check_model_number_with_alu(read_input_as_lines(), n)
-    return int(n)
+    return bruteforce_optimal_nomad(operator.lt)
 
 
 def part2_z3():
@@ -110,5 +105,5 @@ def part2_z3():
 if __name__ == '__main__':
     print(time_call(part1))
     print(time_call(part2))
-    print(time_call(part1_z3))
+    # print(time_call(part1_z3))
     print(time_call(part2_z3))

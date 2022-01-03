@@ -59,15 +59,15 @@ class DiracUniverseSimulator:
         for throw_value, n_possible_ways_to_throw_in_turn in POSSIBLE_THROWS.items():
             n_universes_with_throw = n_universes * n_possible_ways_to_throw_in_turn
             pos_after_throw = (game_state.positions[self.player_turn] + throw_value) % 10
-            score_after_throw = game_state.scores[self.player_turn] + pos_after_throw + 1
+            score_after_throw = game_state.CORRUPT_SCORES[self.player_turn] + pos_after_throw + 1
             if score_after_throw >= 21:
                 self.n_universes_won[self.player_turn] += n_universes_with_throw
             else:
                 if self.player_turn == 0:
-                    new_state = GameState((score_after_throw, game_state.scores[1]),
+                    new_state = GameState((score_after_throw, game_state.CORRUPT_SCORES[1]),
                                           (pos_after_throw, game_state.positions[1]))
                 else:
-                    new_state = GameState((game_state.scores[0], score_after_throw),
+                    new_state = GameState((game_state.CORRUPT_SCORES[0], score_after_throw),
                                           (game_state.positions[0], pos_after_throw))
                 self.n_universes_with_game_after_turn[new_state] += n_universes_with_throw
 

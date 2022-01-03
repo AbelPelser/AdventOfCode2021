@@ -1,7 +1,7 @@
 from util import read_input_as_numbers
 
 
-def find_n_positive_deltas_(items, window_size):
+def find_n_positive_deltas(items, window_size):
     return len([b - a for a, b in zip(items[:-window_size], items[window_size:]) if b > a])
 
 

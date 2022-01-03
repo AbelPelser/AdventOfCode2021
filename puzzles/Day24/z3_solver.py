@@ -15,6 +15,9 @@ class Z3ConstraintGenerator:
             # x, y, z start at 0
             self.solver.add(self.variables[var_name][0] == 0)
 
+    def add_to_solver(self, condition):
+        self.solver.add(condition)
+
     def create_target(self, var_name):
         var_list = self.variables[var_name]
         new_var = z3.Int(f'{var_name}{len(var_list)}')
@@ -39,31 +42,41 @@ class Z3ConstraintGenerator:
         for line in lines:
             op, target, operands = self.parse_line(line)
             if op == 'inp':
-                self.solver.add(target < 10)
-                self.solver.add(target > 0)
+                self.add_to_solver(target < 10)
+                self.add_to_solver(target > 0)
             elif op == 'add':
-                # if not (isinstance(operands[1], int) and operands[1] == 0):
-                self.solver.add(target == (operands[0] + operands[1]))
+                if isinstance(operands[1], int) and operands[1] == 0:
+                    self.add_to_solver(target == operands[0])
+                else:
+                    self.add_to_solver(target == (operands[0] + operands[1]))
             elif op == 'mul':
-                # if not (isinstance(operands[1], int) and operands[1] == 0):
-                self.solver.add(target == (operands[0] * operands[1]))
+                if isinstance(operands[1], int) and operands[1] == 0:
+                    self.add_to_solver(target == 0)
+                elif isinstance(operands[1], int) and operands[1] == 1:
+                    self.add_to_solver(target == operands[0])
+                else:
+                    self.add_to_solver(target == (operands[0] * operands[1]))
             elif op == 'div':
-                # if not (isinstance(operands[1], int) and operands[1] == 1):
-                self.solver.add(target == (operands[0] / operands[1]))
+                if isinstance(operands[1], int) and operands[1] == 1:
+                    self.add_to_solver(target == operands[0])
+                else:
+                    self.add_to_solver(target == (operands[0] / operands[1]))
             elif op == 'mod':
-                self.solver.add(target == (operands[0] % operands[1]))
+                self.add_to_solver(target == (operands[0] % operands[1]))
             elif op == 'eql':
-                self.solver.add(z3.If(operands[0] == operands[1], target == 1, target == 0))
+                self.add_to_solver(z3.If(operands[0] == operands[1], target == 1, target == 0))
         # The last z is the final z, and needs to be 0
-        self.solver.add(self.variables['z'][-1] == 0)
+        self.add_to_solver(self.variables['z'][-1] == 0)
+        print('1')
 
     def find_min_monad(self):
         min_monad = None
         while self.solver.check() == z3.sat:
+            print(self.solver.proof())
             model = self.solver.model()
             monad_string = ''.join((str(model[w]) for w in self.variables['w']))
             min_monad = int(monad_string)
-            self.solver.add(z3.Or([w < model[w] for w in self.variables['w']]))
+            self.add_to_solver(z3.Or([w < model[w] for w in self.variables['w']]))
         return min_monad
 
     def find_max_monad(self):
@@ -72,5 +85,5 @@ class Z3ConstraintGenerator:
             model = self.solver.model()
             monad_string = ''.join((str(model[w]) for w in self.variables['w']))
             max_monad = int(monad_string)
-            self.solver.add(z3.Or([w > model[w] for w in self.variables['w']]))
+            self.add_to_solver(z3.Or([w > model[w] for w in self.variables['w']]))
         return max_monad
