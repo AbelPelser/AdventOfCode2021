@@ -140,3 +140,4 @@ cython_debug/
 
 venv_pypy/
 .idea
+.DS_Store
